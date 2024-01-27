@@ -11,21 +11,27 @@ from numpy.random import randint
 class Game(object):
     # -- builder
     def __init__(self):
-        self.n_tokens = 8
-        self.n_red_tokens = 0
+        self.n_tokens = 5  # 信息令牌数量，两个玩家游戏时为玩家数+3
+        self.n_red_tokens = 0  # 红色令牌数量，表示错误
         self.active_tokens = self.n_tokens
-        self.card_shoe = []
+        self.card_shoe = []  # 牌堆
         self.players = {}
-        self.recycled_cards = []
-        self.played_cards = []
-        self.played_card_piles = {}
+        self.recycled_cards = []  # 回收的牌
+        self.played_cards = []  # 已出的牌
+        self.played_card_piles = {}  # 每种颜色的出牌堆
         
-        self.COLORS = ['Blue', 'Red', 'Green', 'Yellow', 'White']
+        # 限制颜色为红色和蓝色
+        self.COLORS = ['Red', 'Blue']
         self.NUMBERS = ['1', '2', '3', '4', '5']
-        self.AMOUNTS = [3, 2, 2, 2, 1]
+        self.AMOUNTS = [3, 2, 2, 2, 1]  # 每个数字的牌的数量
         
     # -- getters
-    
+    def setup_game(self):
+        self.generate_card_shoe()  # 生成牌堆
+        self.generate_played_piles()  # 初始化出牌堆
+        # 可以在这里添加玩家
+        # 例如: self.add_player("Player 1"), self.add_player("Player 2")
+            
     # -- public methods
     def generate_played_piles(self):
         '''

@@ -22,7 +22,7 @@ class StartWindow:
 
 class HannabiGUI:
     def __init__(self):
-        self.game = Game()
+        self.game = Game()  # 创建 Game 实例
         self.window = tk.Tk()
         self.window.title("Hannabis Game for 2 Players")
 
@@ -37,16 +37,25 @@ class HannabiGUI:
         self.init_player_view(self.left_frame, "Player A", "Player B")
         self.init_player_view(self.right_frame, "Player B", "Player A")
 
-        self.start_game()
+        # 添加用于显示当前玩家的标签
+        self.current_player_label_left = tk.Label(self.left_frame, text="Current Player: Player A")
+        self.current_player_label_left.pack()
 
-    def init_player_view(self, frame, player_name, other_player):
+        self.current_player_label_right = tk.Label(self.right_frame, text="Current Player: Player A")
+        self.current_player_label_right.pack()
+
+    def init_player_view(self, frame, current_player, other_player):
         # 当前玩家的手牌（隐藏）
-        hand_label = tk.Label(frame, text=f"{player_name}'s Hand: XXXXX")
-        hand_label.pack()
+        self.hand_label = tk.Label(frame)
+        self.hand_label.pack()
 
         # 对手玩家的手牌（显示）
-        other_hand_label = tk.Label(frame, text=f"{other_player}'s Hand:")
-        other_hand_label.pack()
+        self.other_hand_label = tk.Label(frame)
+        self.other_hand_label.pack()
+
+        # 出牌堆标签
+        self.pile_label = tk.Label(frame, text="Piles:")
+        self.pile_label.pack()
 
         # 动作按钮
         play_button = tk.Button(frame, text="Play Card", command=self.play_card)
@@ -55,30 +64,41 @@ class HannabiGUI:
         info_button = tk.Button(frame, text="Give Information", command=self.give_information)
         info_button.pack()
 
-        # 游戏信息
-        info_tokens_label = tk.Label(frame, text="Remaining Info Tokens: 5")
-        info_tokens_label.pack()
+        # 游戏信息标签
+        self.info_tokens_label = tk.Label(frame, text="Info Tokens: 5")
+        self.info_tokens_label.pack()
 
-        fuse_tokens_label = tk.Label(frame, text="Remaining Fuse Tokens: 3")
-        fuse_tokens_label.pack()
+        self.fuse_tokens_label = tk.Label(frame, text="Fuse Tokens: 3")
+        self.fuse_tokens_label.pack()
 
-        current_player_label = tk.Label(frame, text=f"Current Player: {player_name}")
-        current_player_label.pack()
+    def start_game(self):
+        self.game.setup_game()  # 设置游戏
+        self.update_ui()  # 更新UI显示初始状态
+
+    def update_ui(self):
+        # 假设 'Player A' 和 'Player B' 是游戏中的玩家
+        player_a_hand = ' '.join(['X' for _ in self.game.players['Player A'].card_hand])
+        player_b_hand = ' '.join(['X' for _ in self.game.players['Player B'].card_hand])
+
+        # 根据游戏状态更新手牌显示
+        self.left_frame.hand_label.config(text=f"Player A's Hand: {player_a_hand}")
+        self.right_frame.hand_label.config(text=f"Player B's Hand: {player_b_hand}")
+
+        # ... 更新对方玩家手牌和其他游戏状态 ...
 
     def play_card(self):
         # 实现出牌逻辑
-        pass
+        # 例如: self.game.play_card("Player A", card_index)
+        self.update_ui()
 
     def give_information(self):
-        # 实现给信息的逻辑
-        pass
-
-    def start_game(self):
-        # 初始化游戏逻辑
-        pass
+        # 实现提供信息的逻辑
+        # 例如: self.game.give_information("Player A", "Player B", info)
+        self.update_ui()
 
     def run(self):
         self.window.mainloop()
+
 
 if __name__ == "__main__":
     start_app = StartWindow()
