@@ -41,7 +41,7 @@ class Game(object):
         '''
         self.active_tokens -= 1
         if self.active_tokens < 0:
-            print 'Game Over'
+            print('Game Over')
     
     def red_token(self):
         '''
@@ -49,7 +49,7 @@ class Game(object):
         '''
         self.n_red_tokens += 1
         if self.n_red_tokens > 3:
-            print 'Game Over'
+            print('Game Over')
     
     def generate_card_shoe(self):
         '''
@@ -58,7 +58,7 @@ class Game(object):
         ordered_card_shoe = self.__generate_ordered_shoe()
         card_shoe = []
         n_cards = len(ordered_card_shoe)
-        for i in xrange(n_cards):
+        for i in range(n_cards):
             n_cards_remaining = n_cards - i
             index_card_to_pile = randint(n_cards_remaining)
             card_shoe.append(ordered_card_shoe[index_card_to_pile])
@@ -83,11 +83,11 @@ class Game(object):
             del self.card_shoe[-1]
             return card
         else :
-            print 'The card shoe is empty'
+            print('The card shoe is empty')
             return None
         
     def distribute_card_hands(self):
-        for i in xrange(5):
+        for i in range(5):
             for player_name in self.players.keys():
                 self.players[player_name].take_card(self.get_card())
     
@@ -119,21 +119,21 @@ class Game(object):
         card = self.players[player_name].play_card(index)
         card_color = card.get_color()
         card_number = card.get_number()
-        print player_name, 'plays the', card_number, card_color
+        print(player_name, 'plays the', card_number, card_color)
         for played_card in self.played_cards :
             if played_card == card :
                 self.red_token()
-                print 'This card has already been played - you get one red token'
+                print('This card has already been played - you get one red token')
                 self.recycle_card(player_name, index)
                 return None
         if card_number == self.played_card_piles[card_color] + 1:
             self.played_card_piles[card_color] += 1
             self.played_cards.append(card)
-            print 'Well done'
+            print('Well done')
             return None
         else :
             self.red_token()
-            print 'You can\'t play this card - you get one red token'
+            print('You can\'t play this card - you get one red token')
             self.recycled_cards.append(card)
             return None
         
@@ -152,7 +152,7 @@ class Game(object):
         ordered_shoe = []
         for color in self.COLORS:
             for i,number in enumerate(self.NUMBERS):
-                for k in xrange(self.AMOUNTS[i]):
+                for k in range(self.AMOUNTS[i]):
                     current_card = Card(color, number, k)
                     ordered_shoe.append(current_card)
         return ordered_shoe

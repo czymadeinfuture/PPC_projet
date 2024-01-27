@@ -21,5 +21,5 @@ game.distribute_card_hands()
 # Game Workflow
 game.play_card('Joe', 2)
 game.give_card('Joe')
-game.recycle_card('Henri', 2)
-game.give_card('Henri')
+game.recycle_card('Henry', 2)
+game.give_card('Henry')
