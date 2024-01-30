@@ -93,11 +93,30 @@ class PlayerClient:
         if 0 <= card_index < len(self.my_hand):
             # 发送打出的牌的信息给服务器
             card_to_play = self.my_hand[card_index]
-            self.socket.sendall(f"play_card {card_to_play}".encode())
+            self.socket.sendall(f"play_card {card_index}".encode())
             print(f"You played: {card_to_play}")
+
+            # 接收服务器响应和新牌
+            response = self.socket.recv(1024).decode()
+            print(response)  # 打印服务器发来的响应
+
+            new_card_info = self.socket.recv(1024).decode()
+            if new_card_info.startswith("new_card"):
+                new_card = new_card_info.split()[1]
+                if new_card != "None":
+                    self.my_hand[card_index] = new_card  # 更新手牌
+                    print(f"New card received: {new_card}")
+                    self.update_hand_to_others()  # 更新手牌信息给其他玩家
+                    self.socket.sendall("hand_updated".encode())
+                else:
+                    print("No more cards in the deck")
         else:
             print("Invalid card selection.")
-            self.handle_play_card()
+            self.handle_play_card()  # 重新选择牌
+
+        # 发送确认消息
+        self.socket.sendall("action_complete".encode())
+      
 
     def run(self):
         # 接收从服务器发送的客户端ID，并保存

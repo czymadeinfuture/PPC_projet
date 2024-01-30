@@ -122,13 +122,12 @@ class GameServer:
 
             # 可以添加更多处理其他类型请求的代码...
                 
-    def handle_play_card(self, client_socket, client_id, card):
+    def handle_play_card(self, client_socket, client_id, card_index):
         with self.lock:  # 使用锁
             # 提取牌的颜色和数字
-            color, number = card[:-1], int(card[-1])
-
-            # 从共享内存中读取游戏状态
             game_state = self.get_game_state()
+            card = game_state['players_hands'][client_id - 1][card_index]
+            color, number = card[:-1], int(card[-1])
 
             # 判断牌是否可以被成功打出
             if self.can_play_card(game_state, color, number):
@@ -143,13 +142,20 @@ class GameServer:
                 response = "Card played unsuccessfully"
                 print(f"Player {client_id} played {card} unsuccessfully.")
 
+            # 从牌堆中抽一张牌
+            if game_state['deck']:
+                new_card = game_state['deck'].pop(0)
+                print(f"New card drawn: {new_card}")
+                client_socket.sendall(f"new_card {new_card}".encode())
+                game_state['players_hands'][client_id - 1][card_index] = new_card
+            else:
+                new_card = "No more cards"
+                client_socket.sendall("new_card None".encode())
+
             # 更新共享内存中的游戏状态
             serialized_state = pickle.dumps(game_state)
             self.shm.write(serialized_state)
 
-            # 发送结果给客户端
-            client_socket.sendall(response.encode())
-            
             # 检查游戏是否结束
             game_status, reason = self.check_game_over()
             if game_status != "continue":
@@ -158,6 +164,16 @@ class GameServer:
                     player_socket.sendall(f"Game over: {reason}".encode())
                 self.game_started = False  # 更新游戏状态，表示游戏已结束
                 print("Game over:", reason)  # 在服务器控制台打印游戏结束信息
+            else:
+                # 等待玩家确认手牌更新
+                update_confirmation = client_socket.recv(1024).decode()
+                if update_confirmation == "hand_updated":
+                    print(f"Player {client_id} updated hand with new card: {new_card}")
+
+            # 发送行动完成的确认
+            client_socket.sendall("action_complete".encode())
+
+
             
 
     def can_play_card(self, game_state, color, number):
