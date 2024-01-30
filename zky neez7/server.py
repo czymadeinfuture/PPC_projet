@@ -3,6 +3,8 @@ from sysv_ipc import SharedMemory, IPC_CREAT
 import socket
 import threading
 import random
+import os
+import signal
 
 class GameServer:
     def __init__(self, host, port):
@@ -14,6 +16,7 @@ class GameServer:
         self.game_start_event = threading.Event()  # 新增
         self.game_can_start = False
         self.game_started = False  # 新增
+        signal.signal(signal.SIGUSR1, self.handle_game_over_signal)
         self.lock = threading.Lock()  # 初始化一个锁
         self.shm = SharedMemory(12345, IPC_CREAT, size=4096)
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -21,6 +24,14 @@ class GameServer:
         self.server_socket.bind((self.host, self.port))
         self.server_socket.listen()
         print(f"Game server listening on {host}:{port}")
+
+    def handle_game_over_signal(self, signum, frame):
+        """处理游戏结束信号"""
+        print("Game over signal received.")
+        # 通知所有客户端游戏结束
+        for player_socket in self.players:
+            player_socket.sendall("Game over".encode())
+        # 可以在这里添加其它清理资源和准备下一轮游戏的代码
 
     def accept_connections(self):
         """在单独的线程中接受玩家连接"""
@@ -178,12 +189,9 @@ class GameServer:
             client_socket.sendall("action_complete".encode())
 
     def end_game(self, reason):
-        """结束游戏并通知所有玩家游戏结束的原因"""
-        with self.lock:  # 再次确保线程安全
-            for player_socket in self.players:
-                player_socket.sendall(f"Game over: {reason}".encode())
-            self.game_started = False  # 标记游戏已结束
-            print("Game over:", reason)
+        """结束游戏并向所有进程发送游戏结束信号"""
+        print("Game over:", reason)
+        os.kill(os.getpid(), signal.SIGUSR1)  # 向当前进程发送SIGUSR1信号
 
 
     def can_play_card(self, game_state, color, number):

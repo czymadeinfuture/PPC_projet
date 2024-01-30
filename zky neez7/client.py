@@ -1,5 +1,7 @@
 import socket
 import pickle
+import signal
+import os
 from sysv_ipc import SharedMemory, MessageQueue, IPC_CREAT
 
 
